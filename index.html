@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de eBooks AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Gerador de eBooks AI</h1>
+            <p>Crie eBooks, guias práticos, dicas e documentos oficiais com Inteligência Artificial</p>
+        </div>
+    </header>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="tabs">
+                    <div class="tab active" data-tab="generator">Gerador</div>
+                    <div class="tab" data-tab="history">Histórico</div>
+                </div>
+                
+                <!-- Tab Content: Generator -->
+                <div class="tab-content active" id="generator">
+                    <div class="card">
+                        <div class="card-header">
+                            Gerar Novo Documento
+                        </div>
+                        <div class="card-body">
+                            <form id="generator-form">
+                                <div class="row">
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-group">
+                                            <label for="title" class="form-label">Título do Documento</label>
+                                            <input type="text" id="title" name="title" class="form-control" required placeholder="Ex: Guia Completo de Marketing Digital">
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-group">
+                                            <label for="theme" class="form-label">Tema</label>
+                                            <input type="text" id="theme" name="theme" class="form-control" required placeholder="Ex: Estratégias de SEO para pequenas empresas">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-group">
+                                            <label for="ai_model" class="form-label">Modelo de IA</label>
+                                            <select id="ai_model" name="ai_model" class="form-select" required>
+                                                <option value="openai">OpenAI (GPT-3.5/4)</option>
+                                                <option value="anthropic">Anthropic (Claude)</option>
+                                                <option value="gemini">Google Gemini</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-group">
+                                            <label for="doc_type" class="form-label">Tipo de Documento</label>
+                                            <select id="doc_type" name="doc_type" class="form-select" required>
+                                                <option value="ebook">eBook</option>
+                                                <option value="guia_pratico">Guia Prático</option>
+                                                <option value="dicas">Dicas</option>
+                                                <option value="documento_oficial">Documento Oficial</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-group">
+                                            <label for="page_count" class="form-label">Tamanho</label>
+                                            <select id="page_count" name="page_count" class="form-select" required>
+                                                <option value="20">20 páginas</option>
+                                                <option value="50">50 páginas</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-group">
+                                            <label for="language" class="form-label">Idioma</label>
+                                            <select id="language" name="language" class="form-select" required>
+                                                <option value="pt-BR">Português</option>
+                                                <option value="en-US">Inglês</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-group">
+                                            <label for="quality" class="form-label">Qualidade</label>
+                                            <select id="quality" name="quality" class="form-select" required>
+                                                <option value="standard">Padrão</option>
+                                                <option value="high" selected>Alta</option>
+                                                <option value="premium">Premium</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group mt-4">
+                                    <button type="submit" class="btn btn-primary btn-block" id="generate-btn">
+                                        <i class="fas fa-magic"></i> Gerar Documento
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div id="generation-status" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                Status da Geração
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <div class="spinner"></div>
+                                    <p class="mt-3" id="status-message">Gerando seu documento... Por favor, aguarde.</p>
+                                    <div class="progress mt-3">
+                                        <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="generation-result" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                Documento Gerado
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i> Seu documento foi gerado com sucesso!
+                                </div>
+                                <h3 id="result-title" class="mb-3"></h3>
+                                <div class="row">
+                                    <div class="col-12 col-md-6">
+                                        <p><strong>Tema:</strong> <span id="result-theme"></span></p>
+                                        <p><strong>Tipo:</strong> <span id="result-type"></span></p>
+                                        <p><strong>Tamanho:</strong> <span id="result-size"></span> páginas</p>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <p><strong>Modelo de IA:</strong> <span id="result-ai"></span></p>
+                                        <p><strong>Idioma:</strong> <span id="result-language"></span></p>
+                                        <p><strong>Data de Geração:</strong> <span id="result-date"></span></p>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <a href="#" id="download-btn" class="btn btn-primary">
+                                        <i class="fas fa-download"></i> Baixar PDF
+                                    </a>
+                                    <button id="preview-btn" class="btn btn-secondary ml-2">
+                                        <i class="fas fa-eye"></i> Visualizar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="preview-container" class="mt-4" style="display: none;">
+                            <div class="card">
+                                <div class="card-header">
+                                    Visualização do Documento
+                                </div>
+                                <div class="card-body">
+                                    <iframe id="pdf-preview" class="pdf-preview" src=""></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: History -->
+                <div class="tab-content" id="history">
+                    <div class="card">
+                        <div class="card-header">
+                            Histórico de Documentos
+                        </div>
+                        <div class="card-body">
+                            <div id="history-empty" style="display: none;">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> Você ainda não gerou nenhum documento.
+                                </div>
+                            </div>
+                            <div id="history-table">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Tipo</th>
+                                            <th>Modelo de IA</th>
+                                            <th>Data</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-items">
+                                        <!-- Histórico será carregado dinamicamente via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <div class="container text-center">
+            <p>&copy; 2025 Gerador de eBooks AI. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Modal de Confirmação para Exclusão -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Confirmar Exclusão</h3>
+            <p>Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.</p>
+            <div class="mt-4">
+                <button id="confirm-delete" class="btn btn-danger">Excluir</button>
+                <button id="cancel-delete" class="btn btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
